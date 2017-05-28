@@ -16,7 +16,7 @@ batch_size = 5
 state_size = 6
 learning_rate = 0.1
 num_layers = 1
-svmC = 1
+
 
 FLAGS = tf.flags.FLAGS
 FLAGS._parse_flags()
@@ -114,10 +114,9 @@ def main():
 	W = tf.Variable(tf.zeros([state_size*num_steps,1]))
 	b = tf.Variable(tf.zeros([batch_size]))
 	y_raw = tf.matmul(hidden_states,W) + b
-	regularization_loss = 0.5*tf.reduce_sum(tf.square(W)) 
-    hinge_loss = tf.reduce_sum(tf.maximum(tf.zeros([BATCH_SIZE,1]), 1 - y*y_raw));
-    svm_loss = regularization_loss + svmC*hinge_loss;
-    train_step = tf.train.GradientDescentOptimizer(0.01).minimize(svm_loss)
+	
+    loss = tf.reduce_mean(-tf.reduce_sum(y*tf.log(y_raw), reduction_indices=1))
+    train_step = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
 	predicted_class = tf.sign(y_raw);
     correct_prediction = tf.equal(y,predicted_class)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
